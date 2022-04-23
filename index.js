@@ -49,6 +49,17 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
+
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: 'The name or number is missing'
+        })
+    } else if (persons.find(p => p.name === body.name)) {
+        return response.status(400).json({
+            error: 'The name already exists in the phonebook'
+        })
+    }
+
     const id = Math.floor(Math.random() * 1000)
 
     const newPerson = {
@@ -56,6 +67,8 @@ app.post('/api/persons', (request, response) => {
         "name": body.name,
         "number": body.number
     }
+
+    persons = persons.concat(newPerson)
 
     response.json(newPerson)
 })
