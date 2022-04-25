@@ -48,25 +48,22 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: 'The name or number is missing'
         })
-    } else if (persons.find(p => p.name === body.name)) {
-        return response.status(400).json({
-            error: 'The name already exists in the phonebook'
-        })
     }
+    // else if (persons.find(p => p.name === body.name)) {
+    //     return response.status(400).json({
+    //         error: 'The name already exists in the phonebook'
+    //     })
+    // }
 
-    const id = Math.floor(Math.random() * 1000)
-
-    const newPerson = {
-        "id": id,
+    const newPerson = new Person({
         "name": body.name,
         "number": body.number
-    }
+    })
 
-    persons = persons.concat(newPerson)
-
-    response.json(newPerson)
+    newPerson.save()
+        .then(savedNote => response.json(savedNote))
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 
 app.listen(PORT, () => console.log(`server is running on port ${PORT}`)) 
