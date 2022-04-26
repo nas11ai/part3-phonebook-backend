@@ -3,6 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+
 const app = express()
 
 app.use(express.json())
@@ -16,21 +17,28 @@ morgan.token('request-body', function getRequestBody(req, res) {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :request-body'))
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     Person.find({})
         .then(persons => response.json(persons))
+        .catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
     const requestTime = new Date(Date.now())
-    response.send(`<p>Phonebook has info for ${persons.length} people at this moment</p> <p>${requestTime}</p>`)
+
+    Person.find({})
+        .then(response => {
+            response.send(`<p>Phonebook has info for ${response.length} people at this moment</p> <p>${requestTime}</p>`)
+        })
+        .catch(error => next(error))
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     const id = Number(request.params.id)
-    const person = persons.find(p => p.id === id)
 
-    person ? response.json(person) : response.status(404).send(`<p>no ingfoo</p>`).end()
+    Person.findById(id)
+        .then(person => person ? response.json(person) : response.status(404).end())
+        .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -49,11 +57,6 @@ app.post('/api/persons', (request, response) => {
             error: 'The name or number is missing'
         })
     }
-    // else if (persons.find(p => p.name === body.name)) {
-    //     return response.status(400).json({
-    //         error: 'The name already exists in the phonebook'
-    //     })
-    // }
 
     const newPerson = new Person({
         "name": body.name,
@@ -61,7 +64,7 @@ app.post('/api/persons', (request, response) => {
     })
 
     newPerson.save()
-        .then(savedNote => response.json(savedNote))
+        .then(savedPerson => response.json(savedPerson))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
