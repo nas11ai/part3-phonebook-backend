@@ -5,6 +5,8 @@ mongoose.connect(url)
     .then(result => console.log('connected to MongoDB'))
     .catch(err => console.log(`can't connect to MongoDB: ${err}`))
 
+const numberValidator = (number) => /^([0-9]{2}-|[0-9]{3}-)[0-9]*$/i.test(number)
+
 const personSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -13,7 +15,12 @@ const personSchema = new mongoose.Schema({
     },
     number: {
         type: String,
-        required: true
+        minlength: 8,
+        required: true,
+        validate: {
+            validator: numberValidator,
+            message: 'Invalid phone number'
+        }
     }
 })
 
